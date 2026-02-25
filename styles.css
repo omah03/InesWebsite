@@ -1,0 +1,603 @@
+﻿:root {
+  --bg: #ffffff;
+  --gold: #c8a75d;
+  --gold-soft: rgba(214, 182, 112, 0.85);
+  --gold-muted: rgba(207, 176, 108, 0.52);
+  --line: rgba(223, 194, 132, 0.72);
+  --off-white: #f8f3e8;
+  --overlay: rgba(0, 0, 0, 0.35);
+  --ease-sacred: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--gold);
+  font-family: "Cinzel", serif;
+  overflow: hidden;
+}
+
+.calligraphy-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  color: #b39a66;
+  mix-blend-mode: multiply;
+  opacity: 0.054;
+  transition: opacity 1.2s var(--ease-sacred);
+}
+
+.calligraphy-layer svg {
+  width: 100%;
+  height: 100%;
+}
+
+.booting .calligraphy-layer {
+  opacity: 0;
+}
+
+.hero-header {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 5;
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
+  width: min(92vw, 980px);
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  opacity: 1;
+  transition: top 1.85s var(--ease-sacred), transform 1.85s var(--ease-sacred), width 1.85s var(--ease-sacred), opacity 1.1s ease;
+}
+
+.booting .hero-header {
+  opacity: 0;
+}
+
+.name-svg {
+  width: min(84vw, 620px);
+  overflow: visible;
+}
+
+.message-svg {
+  width: min(90vw, 880px);
+  overflow: visible;
+  transition: opacity 1.15s var(--ease-sacred), transform 1.15s var(--ease-sacred);
+}
+
+.draw-text {
+  fill: transparent;
+  stroke: var(--gold-soft);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1600;
+  stroke-dashoffset: 1600;
+  paint-order: stroke fill;
+  text-rendering: geometricPrecision;
+  shape-rendering: geometricPrecision;
+  will-change: stroke-dashoffset, filter;
+}
+
+.name-text {
+  font-family: "Amiri", serif;
+  font-size: 125px;
+  letter-spacing: 1px;
+  direction: rtl;
+  unicode-bidi: plaintext;
+}
+
+.message-text {
+  stroke-width: 1.15;
+  font-size: 49px;
+}
+
+.message-text.arabic {
+  font-family: "Amiri", serif;
+  direction: rtl;
+  unicode-bidi: plaintext;
+}
+
+.message-text.english {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 40px;
+  letter-spacing: 0.8px;
+}
+
+.draw-text.revealed {
+  fill: rgba(208, 176, 106, 0.09);
+}
+
+.draw-text.glow {
+  filter: drop-shadow(0 0 9px rgba(227, 196, 130, 0.53));
+}
+
+.scene {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.flower-wrap {
+  width: min(74vmin, 620px);
+  opacity: 0;
+  transform: translateY(24px) scale(0.94);
+  transition: opacity 1.1s var(--ease-sacred), transform 1.1s var(--ease-sacred);
+  position: relative;
+  z-index: 6;
+}
+
+body.intro-finished .hero-header {
+  top: 2.35rem;
+  transform: translate(-50%, 0);
+  width: min(92vw, 980px);
+}
+
+body.intro-finished .message-svg {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.95);
+}
+
+body.flower-entered .flower-wrap {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+#flowerSvg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.petal {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  opacity: 0;
+  transition: opacity 0.5s ease, filter 0.45s ease;
+}
+
+.petal.visible {
+  opacity: 1;
+}
+
+.petal.interactive {
+  cursor: pointer;
+}
+
+.petal.interactive:hover {
+  filter: drop-shadow(0 0 8px rgba(215, 180, 106, 0.42));
+  animation: breathe 2.8s ease-in-out infinite;
+}
+
+.petal.faded {
+  opacity: 0.28;
+}
+
+.petal.hidden {
+  opacity: 0;
+}
+
+.core-ring {
+  fill: none;
+  stroke: rgba(221, 192, 128, 0.65);
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  filter: drop-shadow(0 0 6px rgba(223, 188, 116, 0.28));
+  transition: opacity 0.35s ease, filter 0.35s ease;
+}
+
+.core-ring.visible {
+  opacity: 1;
+}
+
+.core-ring.interactive {
+  cursor: pointer;
+}
+
+.flower-wrap.ready .core-ring {
+  filter: drop-shadow(0 0 9px rgba(232, 198, 129, 0.5));
+}
+
+.photo-wall {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  padding: 12rem 1.15rem 1rem;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+  transition: opacity 0.65s var(--ease-sacred), transform 0.65s var(--ease-sacred);
+}
+
+body.wall-open .photo-wall {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.wall-grid {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  grid-auto-rows: clamp(116px, 10.2vw, 176px);
+  gap: 0.38rem;
+  align-content: start;
+}
+
+.wall-card {
+  position: relative;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.48);
+  border-radius: 4px;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  min-height: 0;
+  opacity: 0;
+  transform: translateY(14px) scale(0.97);
+  transition: opacity 0.65s var(--ease-sacred), transform 0.65s var(--ease-sacred), box-shadow 0.35s ease;
+  transition-delay: var(--batch-delay, 0ms);
+  cursor: pointer;
+  contain: content;
+}
+
+.wall-card.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.wall-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.wall-card video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.wall-card.video-card::after {
+  content: "VIDEO";
+  position: absolute;
+  right: 0.3rem;
+  bottom: 0.25rem;
+  font-family: "Cinzel", serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.6px;
+  color: rgba(255, 246, 227, 0.95);
+  background: rgba(0, 0, 0, 0.36);
+  border-radius: 3px;
+  padding: 0.08rem 0.26rem;
+}
+
+.wall-card.broken {
+  background: rgba(255, 240, 214, 0.8);
+}
+
+.wall-card:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.22);
+  z-index: 5;
+}
+
+.wall-card.expanded {
+  z-index: 9;
+  transform: scale(1.42) !important;
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.26);
+}
+
+.wall-empty {
+  grid-column: 1 / -1;
+  padding: 1.2rem;
+  border-radius: 10px;
+  text-align: center;
+  color: rgba(132, 100, 46, 0.88);
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+body.petals-top .flower-wrap {
+  pointer-events: none;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    stroke-width: 1.5;
+    opacity: 1;
+  }
+
+  50% {
+    stroke-width: 1.8;
+    opacity: 0.88;
+  }
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  opacity: 0;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0);
+  backdrop-filter: blur(0px);
+  transition: opacity 0.45s ease, background 0.6s var(--ease-sacred), backdrop-filter 0.6s var(--ease-sacred);
+}
+
+.overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+  background: var(--overlay);
+  backdrop-filter: blur(4px);
+}
+
+.morph-frame {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 120px;
+  height: 220px;
+  transform: translate(-50%, -50%);
+  border: 1.4px solid rgba(233, 204, 140, 0.92);
+  border-radius: 48% 48% 46% 46% / 64% 64% 34% 34%;
+  box-shadow: 0 0 14px rgba(219, 186, 113, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: left 0.78s var(--ease-sacred), top 0.78s var(--ease-sacred), width 0.78s var(--ease-sacred), height 0.78s var(--ease-sacred), border-radius 0.78s var(--ease-sacred), opacity 0.28s ease;
+}
+
+.overlay.animating .morph-frame {
+  opacity: 1;
+}
+
+.morph-frame.instant {
+  transition: none !important;
+}
+
+.gallery-panel {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: min(70vw, 1080px);
+  height: min(75vh, 790px);
+  transform: translate(-50%, -50%) scale(0.96);
+  display: grid;
+  grid-template-columns: 52px 1fr 52px;
+  grid-template-rows: 1fr auto;
+  gap: 0.85rem;
+  padding: 1.25rem;
+  border: none;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(247, 241, 227, 0.92));
+  box-shadow: 0 22px 56px rgba(0, 0, 0, 0.2), 0 10px 26px rgba(191, 150, 67, 0.14);
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s ease, transform 0.45s var(--ease-sacred);
+}
+
+.gallery-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.62);
+}
+
+.overlay.panel-open .gallery-panel {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.close-btn {
+  position: absolute;
+  top: 0.7rem;
+  right: 1rem;
+  border: 1px solid rgba(226, 193, 126, 0.62);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  color: rgba(132, 101, 45, 0.95);
+  font-family: "Cinzel", serif;
+  font-size: 0.76rem;
+  letter-spacing: 0.8px;
+  padding: 0.28rem 0.75rem;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease;
+  z-index: 2;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  color: rgba(115, 87, 38, 1);
+}
+
+.nav-btn {
+  align-self: center;
+  justify-self: center;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.88);
+  color: rgba(141, 108, 47, 0.95);
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.nav-btn:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 1);
+}
+
+.main-frame {
+  margin: 0;
+  grid-column: 2;
+  grid-row: 1;
+  position: relative;
+  border: none;
+  border-radius: 20px;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 12px 30px rgba(104, 81, 36, 0.14);
+}
+
+.main-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.68), inset 0 -28px 42px rgba(255, 244, 220, 0.24);
+}
+
+#mainPhoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1);
+  transform-origin: center center;
+  transition: transform 0.5s var(--ease-sacred);
+  cursor: zoom-in;
+}
+
+.main-frame.zoomed #mainPhoto {
+  transform: scale(1.72);
+  cursor: zoom-out;
+}
+
+#photoCaption {
+  min-height: 3rem;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.45px;
+  color: rgba(123, 93, 41, 0.9);
+  background: linear-gradient(180deg, rgba(255, 249, 236, 0.72), rgba(255, 246, 226, 0.92));
+  padding: 0.55rem 1rem 0.5rem;
+}
+
+.thumb-strip {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: flex;
+  gap: 0.55rem;
+  overflow-x: auto;
+  padding: 0.2rem;
+  scrollbar-width: thin;
+}
+
+.thumb-strip::-webkit-scrollbar {
+  height: 7px;
+}
+
+.thumb-strip::-webkit-scrollbar-thumb {
+  background: rgba(235, 206, 145, 0.58);
+  border-radius: 999px;
+}
+
+.thumb {
+  border: 1px solid rgba(236, 206, 141, 0.44);
+  background: rgba(255, 255, 255, 0.07);
+  width: 108px;
+  height: 68px;
+  border-radius: 9px;
+  padding: 0;
+  flex: 0 0 auto;
+  opacity: 0.55;
+  cursor: pointer;
+  transition: transform 0.3s ease, opacity 0.3s ease, border-color 0.3s ease;
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+.thumb:hover {
+  transform: translateY(-1px);
+  opacity: 0.85;
+}
+
+.thumb.active {
+  opacity: 1;
+  border-color: rgba(246, 223, 172, 0.94);
+}
+
+@media (max-width: 900px) {
+  body.intro-finished .hero-header {
+    top: 1.45rem;
+    transform: translate(-50%, 0);
+  }
+
+  .name-text {
+    font-size: 108px;
+  }
+
+  .message-text {
+    font-size: 43px;
+  }
+
+  .message-text.english {
+    font-size: 36px;
+  }
+
+  .flower-wrap {
+    width: min(83vmin, 500px);
+  }
+
+  .photo-wall {
+    padding: 9.5rem 0.55rem 0.6rem;
+  }
+
+  .wall-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: clamp(92px, 23vw, 146px);
+    gap: 0.35rem;
+  }
+
+  .wall-card.expanded {
+    transform: scale(1.16) !important;
+  }
+}
