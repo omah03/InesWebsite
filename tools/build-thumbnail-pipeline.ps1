@@ -42,16 +42,49 @@ if (-not (Test-Path $webImagesPath)) {
   New-Item -Path $webImagesPath -ItemType Directory | Out-Null
 }
 
-try {
-  Add-Type -AssemblyName System.Drawing
-} catch {
-  throw "System.Drawing is unavailable in this PowerShell runtime."
+if ($IsWindows) {
+  try {
+    Add-Type -AssemblyName System.Drawing
+  } catch {
+    throw "System.Drawing is unavailable in this PowerShell runtime."
+  }
+} elseif ($IsMacOS) {
+  if (-not (Get-Command sips -ErrorAction SilentlyContinue)) {
+    throw "sips is required on macOS but was not found on PATH."
+  }
+} else {
+  throw "Unsupported OS for thumbnail generation. Use Windows (System.Drawing) or macOS (sips)."
 }
 
 function Get-JpegCodec {
   [System.Drawing.Imaging.ImageCodecInfo]::GetImageEncoders() |
     Where-Object { $_.MimeType -eq "image/jpeg" } |
     Select-Object -First 1
+}
+
+function Save-JpegThumbnailSips {
+  param(
+    [string]$SourcePath,
+    [string]$TargetPath,
+    [int]$MaxEdge,
+    [int]$Quality
+  )
+
+  # sips expects quality 0-100; clamp to be safe
+  $clampedQuality = [Math]::Max(0, [Math]::Min(100, $Quality))
+
+  $args = @(
+    "-Z", "$MaxEdge",
+    "-s", "format", "jpeg",
+    "-s", "formatOptions", "$clampedQuality",
+    $SourcePath,
+    "--out", $TargetPath
+  )
+
+  $proc = Start-Process -FilePath "sips" -ArgumentList $args -NoNewWindow -PassThru -Wait
+  if ($proc.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $TargetPath)) {
+    throw "sips failed to create output."
+  }
 }
 
 function Save-JpegThumbnail {
@@ -61,6 +94,11 @@ function Save-JpegThumbnail {
     [int]$MaxEdge,
     [int]$Quality
   )
+
+  if ($IsMacOS) {
+    Save-JpegThumbnailSips -SourcePath $SourcePath -TargetPath $TargetPath -MaxEdge $MaxEdge -Quality $Quality
+    return
+  }
 
   $sourceImage = $null
   $bitmap = $null

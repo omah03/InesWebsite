@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ines | Sacred Bloom</title>
+  <title>Ines</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet" />
@@ -41,25 +41,33 @@
     </svg>
   </header>
 
-  <main class="scene">
-    <section id="flowerWrap" class="flower-wrap" aria-label="Seven petal flower gallery entrance">
-      <svg id="flowerSvg" viewBox="-260 -260 520 520" role="img" aria-label="Interactive seven petal flower">
-        <g id="flowerPetals">
-          <path class="petal" data-index="0" d="M 0 0 C 42 -18 86 -86 72 -152 C 58 -199 24 -214 0 -214 C -24 -214 -58 -199 -72 -152 C -86 -86 -42 -18 0 0 Z" transform="rotate(0)"></path>
-          <path class="petal" data-index="1" d="M 0 0 C 42 -18 86 -86 72 -152 C 58 -199 24 -214 0 -214 C -24 -214 -58 -199 -72 -152 C -86 -86 -42 -18 0 0 Z" transform="rotate(51.4286)"></path>
-          <path class="petal" data-index="2" d="M 0 0 C 42 -18 86 -86 72 -152 C 58 -199 24 -214 0 -214 C -24 -214 -58 -199 -72 -152 C -86 -86 -42 -18 0 0 Z" transform="rotate(102.8571)"></path>
-          <path class="petal" data-index="3" d="M 0 0 C 42 -18 86 -86 72 -152 C 58 -199 24 -214 0 -214 C -24 -214 -58 -199 -72 -152 C -86 -86 -42 -18 0 0 Z" transform="rotate(154.2857)"></path>
-          <path class="petal" data-index="4" d="M 0 0 C 42 -18 86 -86 72 -152 C 58 -199 24 -214 0 -214 C -24 -214 -58 -199 -72 -152 C -86 -86 -42 -18 0 0 Z" transform="rotate(205.7143)"></path>
-          <path class="petal" data-index="5" d="M 0 0 C 42 -18 86 -86 72 -152 C 58 -199 24 -214 0 -214 C -24 -214 -58 -199 -72 -152 C -86 -86 -42 -18 0 0 Z" transform="rotate(257.1429)"></path>
-          <path class="petal" data-index="6" d="M 0 0 C 42 -18 86 -86 72 -152 C 58 -199 24 -214 0 -214 C -24 -214 -58 -199 -72 -152 C -86 -86 -42 -18 0 0 Z" transform="rotate(308.5714)"></path>
-        </g>
-        <circle id="coreRing" class="core-ring" cx="0" cy="0" r="24"></circle>
-      </svg>
-    </section>
-  </main>
-
   <section id="photoWall" class="photo-wall" aria-label="Photo wall">
     <div id="wallGrid" class="wall-grid" aria-label="Album photos grid"></div>
+    <aside
+      id="playlistPanel"
+      class="playlist-panel"
+      data-playlist-id="https://open.spotify.com/playlist/1XiJIBcFTh0tv4BXeZGjg7?si=38ad65ce4060478b"
+      aria-label="Spotify playlist"
+    >
+      <div class="playlist-header">
+        <p class="playlist-title">Spotify Playlist</p>
+        <div class="playlist-actions">
+          <button type="button" class="playlist-toggle" aria-expanded="true">Collapse</button>
+          <a class="playlist-open" href="#" target="_blank" rel="noopener">Open in Spotify</a>
+        </div>
+      </div>
+      <div class="playlist-body">
+        <p class="playlist-placeholder">
+          Add your Spotify playlist ID in index.html to show the song list here.
+        </p>
+        <iframe
+          class="playlist-embed"
+          title="Spotify playlist"
+          loading="lazy"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        ></iframe>
+      </div>
+    </aside>
   </section>
 
   <script src="photos/media-manifest.js"></script>

@@ -6,6 +6,8 @@ const petals = Array.from(document.querySelectorAll(".petal"));
 const coreRing = document.getElementById("coreRing");
 const photoWall = document.getElementById("photoWall");
 const wallGrid = document.getElementById("wallGrid");
+const playlistPanel = document.getElementById("playlistPanel");
+const flowerEnabled = Boolean(flowerWrap && coreRing && petals.length);
 
 const manifestEntries = Array.isArray(window.PHOTO_MEDIA) ? window.PHOTO_MEDIA : [];
 const legacyManifestFiles = Array.isArray(window.PHOTO_MEDIA_FILES) ? window.PHOTO_MEDIA_FILES : [];
@@ -34,6 +36,20 @@ function getMediaKind(fileName, hintedKind = "") {
   }
 
   return /\.(mp4|webm|ogg|mov)$/i.test(fileName) ? "video" : "image";
+}
+
+function normalizePlaylistId(value) {
+  const raw = String(value || "").trim();
+  if (!raw) {
+    return "";
+  }
+
+  const match = /playlist\/([a-zA-Z0-9]+)/.exec(raw);
+  if (match) {
+    return match[1];
+  }
+
+  return /^[a-zA-Z0-9]+$/.test(raw) ? raw : "";
 }
 
 function deriveImageThumb(fileName) {
@@ -203,6 +219,41 @@ function ensureVideoLoaded(video) {
   video.dataset.loaded = "1";
 }
 
+function primeVideoPreview(video, card) {
+  if (!video || video.dataset.previewed === "1") {
+    return;
+  }
+
+  video.dataset.previewed = "1";
+  video.preload = "metadata";
+  if (!video.src) {
+    video.src = video.dataset.src || "";
+  }
+
+  const handleError = () => {
+    if (card) {
+      card.classList.add("broken");
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    const duration = Number.isFinite(video.duration) ? video.duration : 0;
+    const targetTime = duration > 0 ? Math.min(0.1, Math.max(0, duration - 0.01)) : 0.01;
+    try {
+      video.currentTime = targetTime;
+    } catch (_error) {
+    }
+  };
+
+  const handleSeeked = () => {
+    video.pause();
+  };
+
+  video.addEventListener("loadedmetadata", handleLoadedMetadata, { once: true });
+  video.addEventListener("seeked", handleSeeked, { once: true });
+  video.addEventListener("error", handleError, { once: true });
+}
+
 function queueImageLoad(image, card) {
   if (!image || image.dataset.loaded === "1" || image.dataset.queued === "1") {
     return;
@@ -279,6 +330,9 @@ function setupMediaObserver() {
         if (card.dataset.kind === "image") {
           const image = card.querySelector("img");
           queueImageLoad(image, card);
+        } else if (card.dataset.kind === "video") {
+          const video = card.querySelector("video");
+          primeVideoPreview(video, card);
         }
       });
     },
@@ -291,6 +345,10 @@ function setupMediaObserver() {
 }
 
 function primeFlowerStrokes() {
+  if (!flowerEnabled) {
+    return;
+  }
+
   if (state.petalBaseAngles.length === 0) {
     state.petalBaseAngles = petals.map((petal) => parseRotateAngle(petal.getAttribute("transform")));
   }
@@ -315,6 +373,10 @@ function primeFlowerStrokes() {
 }
 
 async function drawFlower() {
+  if (!flowerEnabled) {
+    return;
+  }
+
   const coreLength = state.coreLength || coreRing.getTotalLength();
   coreRing.style.strokeDasharray = String(coreLength);
   coreRing.style.strokeDashoffset = String(coreLength);
@@ -363,6 +425,10 @@ async function drawFlower() {
 }
 
 async function runPetalLineup() {
+  if (!flowerEnabled) {
+    return;
+  }
+
   const spacing = 122;
   const rowY = 174;
   const rowScale = 0.54;
@@ -385,6 +451,10 @@ async function runPetalLineup() {
 }
 
 async function movePetalsToTop() {
+  if (!flowerEnabled) {
+    return;
+  }
+
   const spacing = 92;
   const rowY = -216;
   const rowScale = 0.4;
@@ -434,6 +504,59 @@ function shuffle(array) {
   return copy;
 }
 
+function hashToUnit(value) {
+  const str = String(value || "");
+  let hash = 2166136261;
+
+  for (let i = 0; i < str.length; i += 1) {
+    hash ^= str.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return (hash >>> 0) / 4294967295;
+}
+
+function pickWallSize(photo, index) {
+  const basis = `${photo.src || ""}|${photo.kind || ""}|${index}`;
+  const roll = hashToUnit(basis);
+
+  if (photo.kind === "video") {
+    if (roll < 0.1) {
+      return "size-2x1";
+    }
+    return "";
+  }
+
+  if (roll < 0.08) {
+    return "size-2x2";
+  }
+  if (roll < 0.2) {
+    return "size-2x1";
+  }
+  if (roll < 0.3) {
+    return "size-1x2";
+  }
+
+  return "";
+}
+
+function applyWallCardStyle(card, photo, index) {
+  const base = `${photo.src || ""}|${photo.kind || ""}|${index}`;
+  const tilt = (hashToUnit(`${base}|tilt`) - 0.5) * 3.4;
+  const floatX = (hashToUnit(`${base}|x`) - 0.5) * 8;
+  const floatY = (hashToUnit(`${base}|y`) - 0.5) * 10;
+  const shadowY = Math.round(10 + hashToUnit(`${base}|sy`) * 10);
+  const shadowBlur = Math.round(18 + hashToUnit(`${base}|sb`) * 18);
+
+  card.style.setProperty("--tilt", `${tilt.toFixed(2)}deg`);
+  card.style.setProperty("--float-x", `${floatX.toFixed(1)}px`);
+  card.style.setProperty("--float-y", `${floatY.toFixed(1)}px`);
+  card.style.setProperty("--shadow-y", `${shadowY}px`);
+  card.style.setProperty("--shadow-blur", `${shadowBlur}px`);
+}
+
+
+
 function toggleCardExpanded(card) {
   const collapse = (target) => {
     const video = target.querySelector("video");
@@ -475,6 +598,11 @@ function createWallCard(photo, index) {
   const card = document.createElement("button");
   card.type = "button";
   card.className = "wall-card";
+  const sizeClass = pickWallSize(photo, index);
+  if (sizeClass) {
+    card.classList.add(sizeClass);
+  }
+  applyWallCardStyle(card, photo, index);
   card.style.setProperty("--batch-delay", `${Math.floor(index / FADE_BATCH_SIZE) * 120}ms`);
   card.setAttribute("aria-label", `Open media ${index + 1}`);
   card.dataset.kind = photo.kind;
@@ -484,7 +612,7 @@ function createWallCard(photo, index) {
     video.playsInline = true;
     video.muted = true;
     video.loop = true;
-    video.preload = "none";
+    video.preload = "metadata";
     video.disablePictureInPicture = true;
     video.dataset.src = photo.src;
     if (photo.thumb) {
@@ -575,6 +703,64 @@ function openPhotoWallInline() {
   document.body.classList.add("wall-open");
 }
 
+function setPlaylistCollapsed(shouldCollapse) {
+  if (!playlistPanel) {
+    return;
+  }
+
+  playlistPanel.classList.toggle("collapsed", shouldCollapse);
+  document.body.classList.toggle("playlist-expanded", !shouldCollapse);
+  const toggle = playlistPanel.querySelector(".playlist-toggle");
+  if (toggle) {
+    toggle.textContent = shouldCollapse ? "Expand" : "Collapse";
+    toggle.setAttribute("aria-expanded", String(!shouldCollapse));
+  }
+}
+
+function setupSpotifyPlaylist() {
+  if (!playlistPanel) {
+    return;
+  }
+
+  const playlistId = normalizePlaylistId(playlistPanel.dataset.playlistId);
+  const embed = playlistPanel.querySelector(".playlist-embed");
+  const openLink = playlistPanel.querySelector(".playlist-open");
+  const placeholder = playlistPanel.querySelector(".playlist-placeholder");
+  const toggle = playlistPanel.querySelector(".playlist-toggle");
+
+  if (!playlistId) {
+    playlistPanel.classList.add("playlist-empty");
+    if (embed) {
+      embed.removeAttribute("src");
+    }
+    setPlaylistCollapsed(true);
+    return;
+  }
+
+  const embedUrl = `https://open.spotify.com/embed/playlist/${playlistId}`;
+  const openUrl = `https://open.spotify.com/playlist/${playlistId}`;
+
+  playlistPanel.classList.remove("playlist-empty");
+  if (embed) {
+    embed.src = embedUrl;
+  }
+  if (openLink) {
+    openLink.href = openUrl;
+  }
+  if (placeholder) {
+    placeholder.remove();
+  }
+
+  setPlaylistCollapsed(false);
+
+  if (toggle) {
+    toggle.addEventListener("click", () => {
+      const next = !playlistPanel.classList.contains("collapsed");
+      setPlaylistCollapsed(next);
+    });
+  }
+}
+
 function attachEvents() {
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && state.expandedCard) {
@@ -596,7 +782,6 @@ async function runIntro() {
     try {
       await Promise.race([document.fonts.ready, wait(1400)]);
     } catch (_error) {
-      // Continue even if font loading reports a failure.
     }
   }
 
@@ -611,9 +796,15 @@ async function runIntro() {
     animateDraw(englishMessage, 6200, 260)
   ]);
 
-  await wait(2600);
   document.body.classList.add("intro-finished");
-  await wait(2300);
+
+  if (!flowerEnabled) {
+    await wait(380);
+    openPhotoWallInline();
+    return;
+  }
+
+  await wait(1200);
   document.body.classList.add("flower-entered");
   await wait(250);
 
@@ -629,6 +820,7 @@ async function runIntro() {
 async function init() {
   primeFlowerStrokes();
   setupMediaObserver();
+  setupSpotifyPlaylist();
   attachEvents();
   await runIntro();
 }
